@@ -30,5 +30,5 @@ export default defineConfig({
 	server: {
 		port: 3000,
 	},
-	base: '/itri-satellite-communication',
+	base: './',
 })
