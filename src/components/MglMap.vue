@@ -2,12 +2,12 @@
 	<v-container class="ma-0 pa-0 fill-height">
 		<div ref="map" id="map"></div>
 		<v-card class="tool-card mt-3 ml-3" max-width="200">
-			<v-list density="compact" v-model="activeItem">
+			<v-list variant="tonal" density="compact" active-class="bg-info" class="pa-0">
 				<v-list-item
 					v-for="item in items"
 					:key="item.value"
 					:value="item.value"
-					:class="{ 'bg-info': item.value === -1 }"
+					:active="activeItem === item.value"
 					@click="zoomTo(item.value)"
 				>
 					<v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -53,7 +53,7 @@ const items = [
 	},
 ]
 
-import cloud from '@/assets/images/cloud.png'
+import cloud from '@/assets/images/cloud-network.png'
 const cloudImage = new Image()
 cloudImage.src = cloud
 
@@ -116,6 +116,9 @@ const zoomTo = (idx) => {
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
 
+	for (let popup of document.getElementsByClassName('mapboxgl-popup')) {
+		popup.remove()
+	}
 	if (idx > -1) {
 		new mapboxgl.Popup()
 			.setLngLat(coordinates)
@@ -136,7 +139,7 @@ onMounted(() => {
 		style: 'mapbox://styles/mapbox/dark-v10', // style URL
 		center: origCenter, // starting position [lng, lat]
 		zoom: origZoom, // starting zoom
-		minZoom: 1.5,
+		minZoom: 1.8,
 	})
 
 	map.value.on('load', () => {
@@ -230,7 +233,7 @@ onMounted(() => {
 
 		// cloud
 		map.value.addImage('cloud', cloudImage, {
-			pixelRatio: 2.2,
+			pixelRatio: 2,
 		})
 
 		map.value.addSource('cloud', {
@@ -304,11 +307,18 @@ onMounted(() => {
 	top: 0;
 	left: 0;
 }
+
+.v-list-item:first-of-type {
+	border-bottom: 3px solid #fff;
+	padding: 12px;
+}
 </style>
 
 <style>
 .mapboxgl-popup-content {
 	padding: 12px 24px 12px 12px;
+	font-size: 14px;
+	line-height: 1.5;
 }
 
 .mapboxgl-popup-close-button {
