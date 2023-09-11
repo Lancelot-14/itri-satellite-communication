@@ -53,8 +53,9 @@ const items = [
 	},
 ]
 
+import cloud from '@/assets/images/cloud.png'
 const cloudImage = new Image()
-cloudImage.src = '/src/assets/images/cloud.png'
+cloudImage.src = cloud
 
 const map = ref(null)
 const activeItem = ref(-1)
