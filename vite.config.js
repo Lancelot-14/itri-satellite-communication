@@ -30,5 +30,6 @@ export default defineConfig({
 	server: {
 		port: 3000,
 	},
-	base: '/itri-satellite-communication/',
+	// base: process.env.NODE_ENV === 'production' ? '/itri-satellite-communication/' : '/',
+	base: './',
 })

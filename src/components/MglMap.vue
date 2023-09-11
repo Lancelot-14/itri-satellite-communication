@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import mapboxgl from 'mapbox-gl'
 
 import { pulsingDot } from '@/assets/scripts/pulsingDot'
@@ -115,7 +115,7 @@ const zoomTo = (idx) => {
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
 
-	if (idx > 0) {
+	if (idx > -1) {
 		new mapboxgl.Popup()
 			.setLngLat(coordinates)
 			.setHTML(
