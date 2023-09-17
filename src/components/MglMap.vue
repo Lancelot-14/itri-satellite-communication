@@ -91,7 +91,6 @@ const setActiveLine = (idx) => {
 
 const zoomTo = (idx) => {
 	const slowFly = (activeItem.value < 2 && idx > 1) || (activeItem.value > 1 && idx < 2)
-	console.log(slowFly)
 
 	activeItem.value = idx
 	setActiveLine(idx)
@@ -206,7 +205,6 @@ onMounted(() => {
 				layers: ['clusters'],
 			})
 			const clusterId = features[0].properties.cluster_id
-			console.log(clusterId)
 			map.value.getSource('satellites').getClusterExpansionZoom(clusterId, (err, zoom) => {
 				if (err) return
 
@@ -333,7 +331,7 @@ onUnmounted(() => {
 }
 
 .mapboxgl-popup-content {
-	padding: 24px 16px 12px 16px;
+	padding: 28px 16px 16px 16px;
 	font-size: 14px;
 	line-height: 1.5;
 }
@@ -341,6 +339,6 @@ onUnmounted(() => {
 .mapboxgl-popup-close-button {
 	height: 20px;
 	width: 20px;
-	margin: 4px 8px 0 0;
+	margin: 8px 8px 0 0;
 }
 </style>
