@@ -14,8 +14,8 @@ import { createApp } from 'vue'
 import { registerPlugins } from '@/plugins'
 
 // Style
-import '@/assets/styles/main.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import '@/assets/styles/main.scss'
 
 const app = createApp(App)
 

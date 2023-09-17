@@ -18,12 +18,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, h, render } from 'vue'
 import mapboxgl from 'mapbox-gl'
+
+import PopupContent from '@/components/PopupContent.vue'
 
 import { pulsingDot } from '@/assets/scripts/pulsingDot'
 
 import { SATELLITES_GEOJSON, LINE_GEOJSON } from '@/constants'
+import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
 /** data */
 const items = [
@@ -31,26 +34,10 @@ const items = [
 		title: 'View All',
 		value: -1,
 	},
-	{
-		title: 'Taipei',
-		value: 0,
-	},
-	{
-		title: 'Hsinchu-1',
-		value: 1,
-	},
-	{
-		title: 'Hsinchu-2',
-		value: 2,
-	},
-	{
-		title: 'Tokyo',
-		value: 3,
-	},
-	{
-		title: 'San Jose',
-		value: 4,
-	},
+	...SATELLITES_GEOJSON.features.map((f) => ({
+		title: f.properties.title,
+		value: f.properties.index,
+	})),
 ]
 
 import cloud from '@/assets/images/cloud-network.png'
@@ -59,9 +46,6 @@ cloudImage.src = cloud
 
 const map = ref(null)
 const activeItem = ref(-1)
-
-const origCenter = [-175, 29]
-const origZoom = 2.3
 /** end of data */
 
 /** methods */
@@ -77,22 +61,25 @@ const loadPulsingDots = (map) => {
 	})
 }
 
-const enableLineAnimation = (layerId) => {
-	var step = 0
-	let dashArraySeq = [
-		[0, 4, 3],
-		[1, 4, 2],
-		[2, 4, 1],
-		[3, 4, 0],
-		[0, 1, 3, 3],
-		[0, 2, 3, 2],
-		[0, 3, 3, 1],
-	]
-	setInterval(() => {
-		step = (step + 1) % dashArraySeq.length
-		map.value.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step])
-	}, 50)
-}
+const createPopupContent = (title, addr, link) => h(PopupContent, { title, addr, link })
+console.log(createPopupContent('1', '2', '3'))
+
+// const enableLineAnimation = (layerId) => {
+// 	var step = 0
+// 	let dashArraySeq = [
+// 		[0, 4, 3],
+// 		[1, 4, 2],
+// 		[2, 4, 1],
+// 		[3, 4, 0],
+// 		[0, 1, 3, 3],
+// 		[0, 2, 3, 2],
+// 		[0, 3, 3, 1],
+// 	]
+// 	setInterval(() => {
+// 		step = (step + 1) % dashArraySeq.length
+// 		map.value.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step])
+// 	}, 50)
+// }
 
 const setActiveLine = (idx) => {
 	LINE_GEOJSON.features.forEach((f) => {
@@ -103,19 +90,25 @@ const setActiveLine = (idx) => {
 }
 
 const zoomTo = (idx) => {
+	const slowFly = (activeItem.value < 2 && idx > 1) || (activeItem.value > 1 && idx < 2)
+
 	activeItem.value = idx
 	setActiveLine(idx)
 
-	const coordinates = idx < 0 ? origCenter : SATELLITES_GEOJSON.features[idx].geometry.coordinates
+	const coordinates = idx < 0 ? ORIG_CENTER : SATELLITES_GEOJSON.features[idx].geometry.coordinates
 
-	const zoom = idx < 0 ? origZoom : idx < 3 ? (idx === 0 ? 8 : 13) : 6
+	const zoom = idx < 0 ? ORIG_ZOOM : idx < 2 ? 8 : idx === 2 ? 11 : 15
 	map.value.flyTo({
 		center: coordinates,
-		duration: 3000,
+		duration: slowFly ? 7000 : 4000,
 		zoom: zoom,
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
 
+	showPopup(idx, coordinates)
+}
+
+const showPopup = (idx, coordinates) => {
 	for (let popup of document.getElementsByClassName('mapboxgl-popup')) {
 		popup.remove()
 	}
@@ -123,7 +116,17 @@ const zoomTo = (idx) => {
 		new mapboxgl.Popup()
 			.setLngLat(coordinates)
 			.setHTML(
-				`Name: ?<br>Link: <a href="">https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer</a>`
+				`
+				<div class="text-h6 font-weight-bold text-primary mb-2">
+					${SATELLITES_GEOJSON.features[idx].properties.title}
+				</div>
+				<div class="text-caption text-grey mb-2">
+					${SATELLITES_GEOJSON.features[idx].properties.addr}
+				</div>
+				<div class="text-right">
+					<a href="${SATELLITES_GEOJSON.features[idx].properties.link}" target="_blank" class="text-info text-decoration-none">More Info ➜</a>
+				</div>
+				`
 			)
 			.addTo(map.value)
 	}
@@ -137,8 +140,8 @@ onMounted(() => {
 	map.value = new mapboxgl.Map({
 		container: 'map', // container ID
 		style: 'mapbox://styles/mapbox/dark-v10', // style URL
-		center: origCenter, // starting position [lng, lat]
-		zoom: origZoom, // starting zoom
+		center: ORIG_CENTER, // starting position [lng, lat]
+		zoom: ORIG_ZOOM, // starting zoom
 		minZoom: 1.8,
 	})
 
@@ -150,7 +153,7 @@ onMounted(() => {
 			type: 'geojson',
 			data: SATELLITES_GEOJSON,
 			cluster: true,
-			clusterMaxZoom: 14, // Max zoom to cluster points on
+			clusterMaxZoom: 20, // Max zoom to cluster points on
 			clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
 		})
 
@@ -202,12 +205,17 @@ onMounted(() => {
 				layers: ['clusters'],
 			})
 			const clusterId = features[0].properties.cluster_id
+			console.log(clusterId)
 			map.value.getSource('satellites').getClusterExpansionZoom(clusterId, (err, zoom) => {
 				if (err) return
+
+				if (clusterId === 11) zoom = 8
+				if (clusterId === 50) zoom = 14
 				map.value.easeTo({
 					center: features[0].geometry.coordinates,
 					zoom: zoom,
 				})
+				map.value.triggerRepaint()
 			})
 		})
 
@@ -233,7 +241,7 @@ onMounted(() => {
 
 		// cloud
 		map.value.addImage('cloud', cloudImage, {
-			pixelRatio: 2,
+			pixelRatio: 1.5,
 		})
 
 		map.value.addSource('cloud', {
@@ -245,7 +253,7 @@ onMounted(() => {
 						type: 'Feature',
 						geometry: {
 							type: 'Point',
-							coordinates: origCenter,
+							coordinates: ORIG_CENTER,
 						},
 					},
 				],
@@ -291,6 +299,10 @@ onMounted(() => {
 		// enableLineAnimation('internet-line')
 	})
 })
+
+onUnmounted(() => {
+	// map.value.remove()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -315,8 +327,12 @@ onMounted(() => {
 </style>
 
 <style>
+* {
+	font-family: 'Noto Sans TC' !important;
+}
+
 .mapboxgl-popup-content {
-	padding: 12px 24px 12px 12px;
+	padding: 24px 16px 12px 16px;
 	font-size: 14px;
 	line-height: 1.5;
 }
@@ -324,6 +340,6 @@ onMounted(() => {
 .mapboxgl-popup-close-button {
 	height: 20px;
 	width: 20px;
-	margin: 4px 4px 0 0;
+	margin: 4px 8px 0 0;
 }
 </style>

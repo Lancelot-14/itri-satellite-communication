@@ -1,9 +1,12 @@
-const origCenter = [185, 29]
+import { SATELLITES_GEOJSON } from './satellites'
 
-const generateCoordinates = (loc) => {
-	const lngOffset = origCenter[0] - loc[0]
-	const latOffset = origCenter[1] - loc[1]
-}
+const ORIG_CENTER = [187, 29]
+
+const coordinates = SATELLITES_GEOJSON.features.map((geo) => {
+	if (geo.geometry.coordinates[0] < 0)
+		return [geo.geometry.coordinates[0] + 360, geo.geometry.coordinates[1]]
+	else return geo.geometry.coordinates
+})
 
 export const LINE_GEOJSON = {
 	type: 'FeatureCollection',
@@ -13,7 +16,7 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				coordinates: [[121.5598, 25.09108], origCenter],
+				coordinates: [coordinates[0], ORIG_CENTER],
 			},
 		},
 		{
@@ -21,7 +24,7 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				coordinates: [[120.9647, 24.80395], origCenter],
+				coordinates: [coordinates[1], ORIG_CENTER],
 			},
 		},
 		{
@@ -29,7 +32,7 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				coordinates: [[120.9647, 24.81395], origCenter],
+				coordinates: [coordinates[2], ORIG_CENTER],
 			},
 		},
 		{
@@ -37,7 +40,7 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				coordinates: [[139.7036319, 35.6937632], origCenter],
+				coordinates: [coordinates[3], ORIG_CENTER],
 			},
 		},
 		{
@@ -45,8 +48,8 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				// coordinates: [[-121.872734, 37.304051], origCenter],
-				coordinates: [[238.127266, 37.304051], origCenter],
+				// coordinates: [[-121.872734, 37.304051], ORIG_CENTER],
+				coordinates: [coordinates[4], ORIG_CENTER],
 			},
 		},
 	],
