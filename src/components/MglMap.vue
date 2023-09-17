@@ -62,7 +62,7 @@ const loadPulsingDots = (map) => {
 }
 
 const createPopupContent = (title, addr, link) => h(PopupContent, { title, addr, link })
-console.log(createPopupContent('1', '2', '3'))
+// console.log(createPopupContent('1', '2', '3'))
 
 // const enableLineAnimation = (layerId) => {
 // 	var step = 0
@@ -91,6 +91,7 @@ const setActiveLine = (idx) => {
 
 const zoomTo = (idx) => {
 	const slowFly = (activeItem.value < 2 && idx > 1) || (activeItem.value > 1 && idx < 2)
+	console.log(slowFly)
 
 	activeItem.value = idx
 	setActiveLine(idx)
@@ -100,7 +101,7 @@ const zoomTo = (idx) => {
 	const zoom = idx < 0 ? ORIG_ZOOM : idx < 2 ? 8 : idx === 2 ? 11 : 15
 	map.value.flyTo({
 		center: coordinates,
-		duration: slowFly ? 7000 : 4000,
+		duration: slowFly && idx !== -1 ? 6500 : 4000,
 		zoom: zoom,
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
