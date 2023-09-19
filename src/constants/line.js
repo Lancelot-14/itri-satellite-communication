@@ -52,5 +52,13 @@ export const LINE_GEOJSON = {
 				coordinates: [coordinates[4], ORIG_CENTER],
 			},
 		},
+		{
+			type: 'Feature',
+			properties: { active: false },
+			geometry: {
+				type: 'LineString',
+				coordinates: [coordinates[5], ORIG_CENTER],
+			},
+		},
 	],
 }

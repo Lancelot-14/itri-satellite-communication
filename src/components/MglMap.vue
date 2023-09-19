@@ -28,6 +28,8 @@ import { pulsingDot } from '@/assets/scripts/pulsingDot'
 import { SATELLITES_GEOJSON, LINE_GEOJSON } from '@/constants'
 import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
+import cloud from '@/assets/images/cloud-network.png'
+
 /** data */
 const items = [
 	{
@@ -40,7 +42,6 @@ const items = [
 	})),
 ]
 
-import cloud from '@/assets/images/cloud-network.png'
 const cloudImage = new Image()
 cloudImage.src = cloud
 
@@ -61,7 +62,7 @@ const loadPulsingDots = (map) => {
 	})
 }
 
-const createPopupContent = (title, addr, link) => h(PopupContent, { title, addr, link })
+// const createPopupContent = (title, addr, link) => h(PopupContent, { title, addr, link })
 // console.log(createPopupContent('1', '2', '3'))
 
 // const enableLineAnimation = (layerId) => {
@@ -96,11 +97,35 @@ const zoomTo = (idx) => {
 	setActiveLine(idx)
 
 	const coordinates = idx < 0 ? ORIG_CENTER : SATELLITES_GEOJSON.features[idx].geometry.coordinates
+	const offset = idx < 0 ? 0 : SATELLITES_GEOJSON.features[idx].properties.zoomInOffset
 
-	const zoom = idx < 0 ? ORIG_ZOOM : idx < 2 ? 8 : idx === 2 ? 11 : 15
+	let zoom = 0
+	switch (idx) {
+		case -1:
+			zoom = ORIG_ZOOM
+			break
+		case 0:
+			zoom = 8
+			break
+		case 1:
+			zoom = 8
+			break
+		case 2:
+			zoom = 11
+			break
+		case 3:
+			zoom = 15
+			break
+		case 4:
+			zoom = 15
+			break
+		case 5:
+			zoom = 6
+			break
+	}
 	map.value.flyTo({
-		center: coordinates,
-		duration: slowFly && idx !== -1 ? 6500 : 4000,
+		center: [coordinates[0] + offset, coordinates[1]],
+		duration: slowFly && idx !== -1 ? 6000 : 3500,
 		zoom: zoom,
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
@@ -121,15 +146,173 @@ const showPopup = (idx, coordinates) => {
 					${SATELLITES_GEOJSON.features[idx].properties.title}
 				</div>
 				<div class="text-caption text-grey mb-2">
-					${SATELLITES_GEOJSON.features[idx].properties.addr}
+					<div>${SATELLITES_GEOJSON.features[idx].properties.addr}</div>
 				</div>
 				<div class="text-right">
-					<a href="${SATELLITES_GEOJSON.features[idx].properties.link}" target="_blank" class="text-info text-decoration-none">More Info ➜</a>
+					<a href="${
+						SATELLITES_GEOJSON.features[idx].properties.link
+					}" target="_blank" class="text-info text-decoration-none">More Info ➜</a>
 				</div>
+				<img class="popup-img ${idx === 4 ? 'popup-img--left' : ''}" width="600" src="${
+					SATELLITES_GEOJSON.features[idx].properties.imgSrc
+				}" />
 				`
 			)
 			.addTo(map.value)
 	}
+}
+
+const loadSatellites = () => {
+	// satellites
+	map.value.addSource('satellites', {
+		type: 'geojson',
+		data: SATELLITES_GEOJSON,
+		cluster: true,
+		clusterMaxZoom: 20, // Max zoom to cluster points on
+		clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
+	})
+
+	map.value.addLayer({
+		id: 'clusters',
+		type: 'symbol',
+		source: 'satellites',
+		filter: ['has', 'point_count'],
+		layout: {
+			'icon-image': [
+				'step',
+				['get', 'point_count'],
+				'pulsing-dot-cluster-1',
+				3,
+				'pulsing-dot-cluster-2',
+			],
+			'icon-allow-overlap': true,
+		},
+	})
+
+	map.value.addLayer({
+		id: 'unclustered-point',
+		type: 'symbol',
+		source: 'satellites',
+		filter: ['!', ['has', 'point_count']],
+		layout: {
+			'icon-image': 'pulsing-dot',
+			'icon-allow-overlap': true,
+		},
+	})
+
+	map.value.addLayer({
+		id: 'cluster-count',
+		type: 'symbol',
+		source: 'satellites',
+		filter: ['has', 'point_count'],
+		layout: {
+			'text-field': ['get', 'point_count_abbreviated'],
+			'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+			'text-size': 16,
+		},
+		paint: {
+			'text-color': '#ffffff',
+		},
+	})
+
+	map.value.on('click', 'clusters', (e) => {
+		const features = map.value.queryRenderedFeatures(e.point, {
+			layers: ['clusters'],
+		})
+		const clusterId = features[0].properties.cluster_id
+		map.value.getSource('satellites').getClusterExpansionZoom(clusterId, (err, zoom) => {
+			if (err) return
+
+			if (clusterId === 11) zoom = 8
+			if (clusterId === 50) zoom = 14
+			map.value.easeTo({
+				center: features[0].geometry.coordinates,
+				zoom: zoom,
+			})
+			map.value.triggerRepaint()
+		})
+	})
+
+	map.value.on('click', 'unclustered-point', (e) => {
+		const activeIdx = e.features[0].properties.index
+		zoomTo(activeIdx)
+		// map.value.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step])
+	})
+
+	// change cursor style
+	map.value.on('mouseenter', 'clusters', () => {
+		map.value.getCanvas().style.cursor = 'pointer'
+	})
+	map.value.on('mouseleave', 'clusters', () => {
+		map.value.getCanvas().style.cursor = ''
+	})
+	map.value.on('mouseenter', 'unclustered-point', () => {
+		map.value.getCanvas().style.cursor = 'pointer'
+	})
+	map.value.on('mouseleave', 'unclustered-point', () => {
+		map.value.getCanvas().style.cursor = ''
+	})
+}
+
+const loadLines = () => {
+	// line
+	map.value.addSource('line', {
+		type: 'geojson',
+		data: LINE_GEOJSON,
+	})
+
+	// add the line which will be modified in the animation
+	map.value.addLayer(
+		{
+			id: 'internet-line',
+			type: 'line',
+			source: 'line',
+			layout: {
+				// 'line-cap': 'round',
+				// 'line-join': 'round',
+			},
+			paint: {
+				'line-color': ['case', ['boolean', ['get', 'active'], false], '#FFE66F', '#fff'],
+				'line-width': 4,
+				'line-opacity': ['case', ['boolean', ['get', 'active'], false], 1, 0.6],
+				'line-dasharray': [3, 2],
+			},
+		},
+		'clusters'
+	)
+}
+
+const loadClouds = () => {
+	// cloud
+	map.value.addImage('cloud', cloudImage, {
+		pixelRatio: 1.5,
+	})
+
+	map.value.addSource('cloud', {
+		type: 'geojson',
+		data: {
+			type: 'FeatureCollection',
+			features: [
+				{
+					type: 'Feature',
+					geometry: {
+						type: 'Point',
+						coordinates: [187, 29],
+					},
+				},
+			],
+		},
+	})
+
+	map.value.addLayer({
+		id: 'internet-cloud',
+		type: 'symbol',
+		source: 'cloud',
+		layout: {
+			'icon-image': 'cloud',
+			'icon-allow-overlap': true,
+		},
+	})
 }
 /** end of methods */
 
@@ -147,160 +330,12 @@ onMounted(() => {
 
 	map.value.on('load', () => {
 		loadPulsingDots(map.value)
-
-		// satellites
-		map.value.addSource('satellites', {
-			type: 'geojson',
-			data: SATELLITES_GEOJSON,
-			cluster: true,
-			clusterMaxZoom: 20, // Max zoom to cluster points on
-			clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
-		})
-
-		map.value.addLayer({
-			id: 'clusters',
-			type: 'symbol',
-			source: 'satellites',
-			filter: ['has', 'point_count'],
-			layout: {
-				'icon-image': [
-					'step',
-					['get', 'point_count'],
-					'pulsing-dot-cluster-1',
-					3,
-					'pulsing-dot-cluster-2',
-				],
-				'icon-allow-overlap': true,
-			},
-		})
-
-		map.value.addLayer({
-			id: 'unclustered-point',
-			type: 'symbol',
-			source: 'satellites',
-			filter: ['!', ['has', 'point_count']],
-			layout: {
-				'icon-image': 'pulsing-dot',
-				'icon-allow-overlap': true,
-			},
-		})
-
-		map.value.addLayer({
-			id: 'cluster-count',
-			type: 'symbol',
-			source: 'satellites',
-			filter: ['has', 'point_count'],
-			layout: {
-				'text-field': ['get', 'point_count_abbreviated'],
-				'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-				'text-size': 16,
-			},
-			paint: {
-				'text-color': '#ffffff',
-			},
-		})
-
-		map.value.on('click', 'clusters', (e) => {
-			const features = map.value.queryRenderedFeatures(e.point, {
-				layers: ['clusters'],
-			})
-			const clusterId = features[0].properties.cluster_id
-			map.value.getSource('satellites').getClusterExpansionZoom(clusterId, (err, zoom) => {
-				if (err) return
-
-				if (clusterId === 11) zoom = 8
-				if (clusterId === 50) zoom = 14
-				map.value.easeTo({
-					center: features[0].geometry.coordinates,
-					zoom: zoom,
-				})
-				map.value.triggerRepaint()
-			})
-		})
-
-		map.value.on('click', 'unclustered-point', (e) => {
-			const activeIdx = e.features[0].properties.index
-			zoomTo(activeIdx)
-			// map.value.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step])
-		})
-
-		// change cursor style
-		map.value.on('mouseenter', 'clusters', () => {
-			map.value.getCanvas().style.cursor = 'pointer'
-		})
-		map.value.on('mouseleave', 'clusters', () => {
-			map.value.getCanvas().style.cursor = ''
-		})
-		map.value.on('mouseenter', 'unclustered-point', () => {
-			map.value.getCanvas().style.cursor = 'pointer'
-		})
-		map.value.on('mouseleave', 'unclustered-point', () => {
-			map.value.getCanvas().style.cursor = ''
-		})
-
-		// cloud
-		map.value.addImage('cloud', cloudImage, {
-			pixelRatio: 1.5,
-		})
-
-		map.value.addSource('cloud', {
-			type: 'geojson',
-			data: {
-				type: 'FeatureCollection',
-				features: [
-					{
-						type: 'Feature',
-						geometry: {
-							type: 'Point',
-							coordinates: ORIG_CENTER,
-						},
-					},
-				],
-			},
-		})
-
-		map.value.addLayer({
-			id: 'internet-cloud',
-			type: 'symbol',
-			source: 'cloud',
-			layout: {
-				'icon-image': 'cloud',
-				'icon-allow-overlap': true,
-			},
-		})
-
-		// line
-		map.value.addSource('line', {
-			type: 'geojson',
-			data: LINE_GEOJSON,
-		})
-
-		// add the line which will be modified in the animation
-		map.value.addLayer(
-			{
-				id: 'internet-line',
-				type: 'line',
-				source: 'line',
-				layout: {
-					// 'line-cap': 'round',
-					// 'line-join': 'round',
-				},
-				paint: {
-					'line-color': ['case', ['boolean', ['get', 'active'], false], '#FFE66F', '#fff'],
-					'line-width': 4,
-					'line-opacity': ['case', ['boolean', ['get', 'active'], false], 1, 0.6],
-					'line-dasharray': [3, 2],
-				},
-			},
-			'clusters'
-		)
+		loadSatellites()
+		loadClouds()
+		loadLines()
 
 		// enableLineAnimation('internet-line')
 	})
-})
-
-onUnmounted(() => {
-	// map.value.remove()
 })
 </script>
 
@@ -340,5 +375,17 @@ onUnmounted(() => {
 	height: 20px;
 	width: 20px;
 	margin: 8px 8px 0 0;
+}
+
+.popup-img {
+	position: absolute;
+	top: -50%;
+	left: 102%;
+	max-width: 500px;
+	transform: translateY(-15%);
+}
+
+.popup-img--left {
+	left: -230%;
 }
 </style>
