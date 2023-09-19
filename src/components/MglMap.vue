@@ -97,36 +97,11 @@ const zoomTo = (idx) => {
 	setActiveLine(idx)
 
 	const coordinates = idx < 0 ? ORIG_CENTER : SATELLITES_GEOJSON.features[idx].geometry.coordinates
-	const offset = idx < 0 ? 0 : SATELLITES_GEOJSON.features[idx].properties.zoomInOffset
-
-	let zoom = 0
-	switch (idx) {
-		case -1:
-			zoom = ORIG_ZOOM
-			break
-		case 0:
-			zoom = 8
-			break
-		case 1:
-			zoom = 8
-			break
-		case 2:
-			zoom = 11
-			break
-		case 3:
-			zoom = 15
-			break
-		case 4:
-			zoom = 15
-			break
-		case 5:
-			zoom = 6
-			break
-	}
+	const offset = idx < 0 ? 0 : SATELLITES_GEOJSON.features[idx].properties.zoomInLngOffset
 	map.value.flyTo({
 		center: [coordinates[0] + offset, coordinates[1]],
 		duration: slowFly && idx !== -1 ? 6000 : 3500,
-		zoom: zoom,
+		zoom: idx === -1 ? ORIG_ZOOM : SATELLITES_GEOJSON.features[idx].properties.zoom,
 		essential: true, // this animation is considered essential with respect to prefers-reduced-motion
 	})
 

@@ -17,7 +17,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '2880 Zanker Rd., Suite 103, San Jose, CA 95134, USA',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: sanJose,
-				zoomInOffset: 0.5,
+				zoom: 8,
+				zoomInLngOffset: 0.5,
 			},
 			geometry: {
 				type: 'Point',
@@ -33,7 +34,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '31-11, Sakuragaoka-cho, Shibuya-ku,Tokyo 150-8577, Japan',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: tokyo,
-				zoomInOffset: 0.6,
+				zoom: 8,
+				zoomInLngOffset: 0.6,
 			},
 			geometry: {
 				type: 'Point',
@@ -49,7 +51,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '台北市大安區和平東路二段106號',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: taipei,
-				zoomInOffset: 0.1,
+				zoom: 11,
+				zoomInLngOffset: 0.1,
 			},
 			geometry: {
 				type: 'Point',
@@ -65,7 +68,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '新竹縣竹東鎮中興路四段195號',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: hsinchu1,
-				zoomInOffset: 0.0045,
+				zoom: 15,
+				zoomInLngOffset: 0.0045,
 			},
 			geometry: {
 				type: 'Point',
@@ -81,7 +85,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '新竹縣竹東鎮中興路四段195號',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: hsinchu2,
-				zoomInOffset: -0.002,
+				zoom: 15,
+				zoomInLngOffset: -0.002,
 			},
 			geometry: {
 				type: 'Point',
@@ -97,7 +102,8 @@ export const SATELLITES_GEOJSON = {
 				addr: '美屬薩摩亞',
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: fishingVessel,
-				zoomInOffset: 2,
+				zoom: 6,
+				zoomInLngOffset: 2,
 			},
 			geometry: {
 				type: 'Point',
