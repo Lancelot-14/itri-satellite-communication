@@ -30,6 +30,16 @@ import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
 import cloud from '@/assets/images/cloud-network.png'
 
+import { exec } from 'child_process'
+exec('', (err, stdout, stderr) => {
+	if (err) {
+		console.log(err)
+		return
+	}
+	console.log(`stdout: ${stdout}`)
+	console.error(`stderr: ${stderr}`)
+})
+
 /** data */
 const items = [
 	{
@@ -88,6 +98,7 @@ const setActiveLine = (idx) => {
 }
 
 const zoomTo = (idx) => {
+	window.req
 	const slowFly = (activeItem.value < 2 && idx > 1) || (activeItem.value > 1 && idx < 2)
 
 	activeItem.value = idx
