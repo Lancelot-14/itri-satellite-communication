@@ -86,7 +86,7 @@ export const SATELLITES_GEOJSON = {
 				link: 'https://cn.vuejs.org/guide/extras/render-function.html#creating-vnodes',
 				imgSrc: hsinchu2,
 				zoom: 15,
-				zoomInLngOffset: -0.002,
+				zoomInLngOffset: -0.004,
 			},
 			geometry: {
 				type: 'Point',

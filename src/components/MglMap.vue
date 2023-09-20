@@ -42,9 +42,6 @@ const items = [
 	})),
 ]
 
-const cloudImage = new Image()
-cloudImage.src = cloud
-
 const map = ref(null)
 const activeItem = ref(-1)
 /** end of data */
@@ -257,36 +254,40 @@ const loadLines = () => {
 	)
 }
 
-const loadClouds = () => {
+const loadClouds = async () => {
 	// cloud
-	map.value.addImage('cloud', cloudImage, {
-		pixelRatio: 1.5,
-	})
+	await map.value.loadImage(cloud, (err, image) => {
+		if (err) throw err
 
-	map.value.addSource('cloud', {
-		type: 'geojson',
-		data: {
-			type: 'FeatureCollection',
-			features: [
-				{
-					type: 'Feature',
-					geometry: {
-						type: 'Point',
-						coordinates: [187, 29],
+		map.value.addImage('cloud', image, {
+			pixelRatio: 1.5,
+		})
+
+		map.value.addSource('cloud', {
+			type: 'geojson',
+			data: {
+				type: 'FeatureCollection',
+				features: [
+					{
+						type: 'Feature',
+						geometry: {
+							type: 'Point',
+							coordinates: [187, 29],
+						},
 					},
-				},
-			],
-		},
-	})
+				],
+			},
+		})
 
-	map.value.addLayer({
-		id: 'internet-cloud',
-		type: 'symbol',
-		source: 'cloud',
-		layout: {
-			'icon-image': 'cloud',
-			'icon-allow-overlap': true,
-		},
+		map.value.addLayer({
+			id: 'internet-cloud',
+			type: 'symbol',
+			source: 'cloud',
+			layout: {
+				'icon-image': 'cloud',
+				'icon-allow-overlap': true,
+			},
+		})
 	})
 }
 /** end of methods */
