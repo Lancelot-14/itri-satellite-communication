@@ -1,8 +1,9 @@
 <template>
 	<v-container class="ma-0 pa-0 fill-height">
 		<div ref="map" id="map"></div>
+
 		<v-card class="tool-card mt-3 ml-3" max-width="200">
-			<v-list variant="tonal" density="compact" active-class="bg-info" class="pa-0">
+			<!-- <v-list variant="tonal" density="compact" active-class="bg-info" class="pa-0">
 				<v-list-item
 					v-for="item in items"
 					:key="item.value"
@@ -12,13 +13,14 @@
 				>
 					<v-list-item-title>{{ item.title }}</v-list-item-title>
 				</v-list-item>
-			</v-list>
+			</v-list> -->
+			<v-btn color="info" rounded="xs" @click="zoomTo(-1)">View All</v-btn>
 		</v-card>
 	</v-container>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, h, render } from 'vue'
+import { onMounted, createApp, defineComponent, nextTick, ref, h, render } from 'vue'
 import mapboxgl from 'mapbox-gl'
 
 import PopupContent from '@/components/PopupContent.vue'
@@ -30,15 +32,7 @@ import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
 import cloud from '@/assets/images/cloud-network.png'
 
-import { exec } from 'child_process'
-exec('', (err, stdout, stderr) => {
-	if (err) {
-		console.log(err)
-		return
-	}
-	console.log(`stdout: ${stdout}`)
-	console.error(`stderr: ${stderr}`)
-})
+import { registerPlugins } from '@/plugins'
 
 /** data */
 const items = [
@@ -51,6 +45,8 @@ const items = [
 		value: f.properties.index,
 	})),
 ]
+
+const showVideo = ref(true)
 
 const map = ref(null)
 const activeItem = ref(-1)
@@ -68,9 +64,6 @@ const loadPulsingDots = (map) => {
 		pixelRatio: 2,
 	})
 }
-
-// const createPopupContent = (title, addr, link) => h(PopupContent, { title, addr, link })
-// console.log(createPopupContent('1', '2', '3'))
 
 // const enableLineAnimation = (layerId) => {
 // 	var step = 0
@@ -98,7 +91,6 @@ const setActiveLine = (idx) => {
 }
 
 const zoomTo = (idx) => {
-	window.req
 	const slowFly = (activeItem.value < 2 && idx > 1) || (activeItem.value > 1 && idx < 2)
 
 	activeItem.value = idx
@@ -123,25 +115,38 @@ const showPopup = (idx, coordinates) => {
 	if (idx > -1) {
 		new mapboxgl.Popup()
 			.setLngLat(coordinates)
-			.setHTML(
-				`
-				<div class="text-h6 font-weight-bold text-primary mb-2">
-					${SATELLITES_GEOJSON.features[idx].properties.title}
-				</div>
-				<div class="text-caption text-grey mb-2">
-					<div>${SATELLITES_GEOJSON.features[idx].properties.addr}</div>
-				</div>
-				<div class="text-right">
-					<a href="${
-						SATELLITES_GEOJSON.features[idx].properties.link
-					}" target="_blank" class="text-info text-decoration-none">More Info ➜</a>
-				</div>
-				<img class="popup-img ${idx === 4 ? 'popup-img--left' : ''}" width="600" src="${
-					SATELLITES_GEOJSON.features[idx].properties.imgSrc
-				}" />
-				`
-			)
+			.setHTML('<div id="map-popup-content"></div>')
 			.addTo(map.value)
+		console.log(SATELLITES_GEOJSON.features[idx].properties.imgSrc)
+		const MyNewPopup = defineComponent({
+			extends: PopupContent,
+			setup() {
+				const title = ref(SATELLITES_GEOJSON.features[idx].properties.title)
+				const videoSrc = ref(SATELLITES_GEOJSON.features[idx].properties.videoSrc)
+				const imgSrc = ref(SATELLITES_GEOJSON.features[idx].properties.imgSrc)
+				const videoDialog = ref(false)
+				return { title, videoSrc, imgSrc, videoDialog }
+			},
+		})
+
+		nextTick(() => {
+			// const popupComp = h(PopupContent, {
+			// 	// Add props, eventListeners etc. here
+			// 	title: 'Title',
+			// 	addr: 'Addr',
+			// 	link: 'Link',
+			// 	onClick: (e) => {
+			// 		console.debug("An event with name 'click' was fired from popup component")
+			// 	},
+			// })
+			// console.log(popupComp)
+
+			// // Tell Vue to render the VNode inside the element with id
+			// render(popupComp, document.getElementById('map-popup-content'))
+			const app = createApp(MyNewPopup)
+			registerPlugins(app)
+			app.mount('#map-popup-content')
+		})
 	}
 }
 

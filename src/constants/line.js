@@ -48,7 +48,6 @@ export const LINE_GEOJSON = {
 			properties: { active: false },
 			geometry: {
 				type: 'LineString',
-				// coordinates: [[-121.872734, 37.304051], ORIG_CENTER],
 				coordinates: [coordinates[4], ORIG_CENTER],
 			},
 		},
@@ -58,6 +57,30 @@ export const LINE_GEOJSON = {
 			geometry: {
 				type: 'LineString',
 				coordinates: [coordinates[5], ORIG_CENTER],
+			},
+		},
+		{
+			type: 'Feature',
+			properties: { active: false },
+			geometry: {
+				type: 'LineString',
+				coordinates: [coordinates[6], ORIG_CENTER],
+			},
+		},
+		{
+			type: 'Feature',
+			properties: { active: false },
+			geometry: {
+				type: 'LineString',
+				coordinates: [coordinates[7], ORIG_CENTER],
+			},
+		},
+		{
+			type: 'Feature',
+			properties: { active: false },
+			geometry: {
+				type: 'LineString',
+				coordinates: [coordinates[8], ORIG_CENTER],
 			},
 		},
 	],
