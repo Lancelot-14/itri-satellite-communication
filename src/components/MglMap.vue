@@ -108,6 +108,10 @@ const zoomTo = (idx) => {
 	showPopup(idx, coordinates)
 }
 
+const title = ref(null)
+const videoSrc = ref(null)
+const imgSrc = ref(null)
+const videoDialog = ref(false)
 const showPopup = (idx, coordinates) => {
 	for (let popup of document.getElementsByClassName('mapboxgl-popup')) {
 		popup.remove()
@@ -117,14 +121,14 @@ const showPopup = (idx, coordinates) => {
 			.setLngLat(coordinates)
 			.setHTML('<div id="map-popup-content"></div>')
 			.addTo(map.value)
-		console.log(SATELLITES_GEOJSON.features[idx].properties.imgSrc)
+
 		const MyNewPopup = defineComponent({
 			extends: PopupContent,
 			setup() {
-				const title = ref(SATELLITES_GEOJSON.features[idx].properties.title)
-				const videoSrc = ref(SATELLITES_GEOJSON.features[idx].properties.videoSrc)
-				const imgSrc = ref(SATELLITES_GEOJSON.features[idx].properties.imgSrc)
-				const videoDialog = ref(false)
+				title.value = SATELLITES_GEOJSON.features[idx].properties.title
+				videoSrc.value = SATELLITES_GEOJSON.features[idx].properties.videoSrc
+				imgSrc.value = SATELLITES_GEOJSON.features[idx].properties.imgSrc
+				console.log(title, videoSrc, imgSrc, videoDialog)
 				return { title, videoSrc, imgSrc, videoDialog }
 			},
 		})
@@ -143,6 +147,7 @@ const showPopup = (idx, coordinates) => {
 
 			// // Tell Vue to render the VNode inside the element with id
 			// render(popupComp, document.getElementById('map-popup-content'))
+
 			const app = createApp(MyNewPopup)
 			registerPlugins(app)
 			app.mount('#map-popup-content')
