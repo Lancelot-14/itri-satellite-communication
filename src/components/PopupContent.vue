@@ -22,14 +22,28 @@
 	</v-sheet>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script>
+import { ref, defineComponent } from 'vue'
+import { VSheet, VBtn, VImg, VDialog, VCard } from 'vuetify/components'
 
-const title = ref('A')
-const videoSrc = ref('/src/assets/videos/1.mp4')
-const imgSrc = ref('/src/assets/videos/1.mp4')
-
-const videoDialog = ref(false)
+export default defineComponent({
+	name: 'Component',
+	components: {},
+	emits: {},
+	props: {
+		title: String,
+		videoSrc: String,
+		imgSrc: String,
+	},
+	data() {
+		return { count: 1 }
+	},
+	methods: {
+		increment() {
+			this.count++
+		},
+	},
+})
 </script>
 
 <style scoped>

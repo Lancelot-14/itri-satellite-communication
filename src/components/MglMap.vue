@@ -32,7 +32,7 @@ import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
 import cloud from '@/assets/images/cloud-network.png'
 
-import { registerPlugins } from '@/plugins'
+import vuetify from '@/plugins/vuetify'
 
 /** data */
 const items = [
@@ -137,8 +137,6 @@ const showPopup = (idx, coordinates) => {
 			// const popupComp = h(PopupContent, {
 			// 	// Add props, eventListeners etc. here
 			// 	title: 'Title',
-			// 	addr: 'Addr',
-			// 	link: 'Link',
 			// 	onClick: (e) => {
 			// 		console.debug("An event with name 'click' was fired from popup component")
 			// 	},
@@ -148,8 +146,9 @@ const showPopup = (idx, coordinates) => {
 			// // Tell Vue to render the VNode inside the element with id
 			// render(popupComp, document.getElementById('map-popup-content'))
 
+			console.log(MyNewPopup)
 			const app = createApp(MyNewPopup)
-			registerPlugins(app)
+			app.use(vuetify)
 			app.mount('#map-popup-content')
 		})
 	}
