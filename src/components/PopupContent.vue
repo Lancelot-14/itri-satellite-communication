@@ -3,7 +3,20 @@
 		<div class="text-h6 font-weight-bold text-primary mb-2">
 			{{ title }}
 		</div>
-		<v-btn variant="tonal" color="secondary" block @click="videoDialog = true">Video</v-btn>
+		<v-btn
+			v-for="(videoSrc, idx) in videoSrcList"
+			:key="videoSrc.title"
+			class="mb-1"
+			variant="tonal"
+			color="secondary"
+			size="small"
+			block
+			@click="setVideoSrc(videoSrc.src)"
+		>
+			Video {{ idx + 1 }}
+
+			<v-tooltip activator="parent" location="left">{{ videoSrc.title }}</v-tooltip>
+		</v-btn>
 
 		<v-img
 			min-width="600"
@@ -12,10 +25,10 @@
 			style="position: absolute; left: calc(100% + 20px); top: 0; transform: translateY(-40%)"
 		></v-img>
 
-		<v-dialog min-width="700" max-width="1000" v-model="videoDialog">
+		<v-dialog v-model="videoDialog" min-width="700" max-width="1000" max-height="600">
 			<v-card>
-				<video controls>
-					<source :src="videoSrc" type="video/mp4" />
+				<video height="600" controls>
+					<source :src="selectedSrc" type="video/mp4" />
 				</video>
 			</v-card>
 		</v-dialog>
@@ -23,8 +36,7 @@
 </template>
 
 <script>
-import { ref, defineComponent } from 'vue'
-import { VSheet, VBtn, VImg, VDialog, VCard } from 'vuetify/components'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
 	name: 'Component',
@@ -32,15 +44,16 @@ export default defineComponent({
 	emits: {},
 	props: {
 		title: String,
-		videoSrc: String,
+		videoSrcList: Array,
 		imgSrc: String,
 	},
 	data() {
-		return { count: 1 }
+		return { selectedSrc: '', videoDialog: false }
 	},
 	methods: {
-		increment() {
-			this.count++
+		setVideoSrc(src) {
+			this.selectedSrc = src
+			this.videoDialog = true
 		},
 	},
 })

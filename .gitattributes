@@ -1,0 +1,2 @@
+src/assets/videos/JP-1_pexip_Sat-StarlinkJP.mp4 filter=lfs diff=lfs merge=lfs -text
+src/assets/videos/MgnCenter-3_SatelliteManagementCenter-DEMO.mp4 filter=lfs diff=lfs merge=lfs -text

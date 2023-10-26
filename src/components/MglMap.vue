@@ -20,8 +20,10 @@
 </template>
 
 <script setup>
-import { onMounted, createApp, defineComponent, nextTick, ref, h, render } from 'vue'
+import { onMounted, createApp, defineComponent, nextTick, ref } from 'vue'
 import mapboxgl from 'mapbox-gl'
+
+import vuetify from '@/plugins/vuetify'
 
 import PopupContent from '@/components/PopupContent.vue'
 
@@ -30,23 +32,19 @@ import { pulsingDot } from '@/assets/scripts/pulsingDot'
 import { SATELLITES_GEOJSON, LINE_GEOJSON } from '@/constants'
 import { ORIG_CENTER, ORIG_ZOOM } from '@/constants'
 
-import cloud from '@/assets/images/cloud-network.png'
-
-import vuetify from '@/plugins/vuetify'
+import cloud from '@/assets/images/cloud_network.png'
 
 /** data */
-const items = [
-	{
-		title: 'View All',
-		value: -1,
-	},
-	...SATELLITES_GEOJSON.features.map((f) => ({
-		title: f.properties.title,
-		value: f.properties.index,
-	})),
-]
-
-const showVideo = ref(true)
+// const items = [
+// 	{
+// 		title: 'View All',
+// 		value: -1,
+// 	},
+// 	...SATELLITES_GEOJSON.features.map((f) => ({
+// 		title: f.properties.title,
+// 		value: f.properties.index,
+// 	})),
+// ]
 
 const map = ref(null)
 const activeItem = ref(-1)
@@ -109,9 +107,8 @@ const zoomTo = (idx) => {
 }
 
 const title = ref(null)
-const videoSrc = ref(null)
+const videoSrcList = ref(null)
 const imgSrc = ref(null)
-const videoDialog = ref(false)
 const showPopup = (idx, coordinates) => {
 	for (let popup of document.getElementsByClassName('mapboxgl-popup')) {
 		popup.remove()
@@ -126,10 +123,9 @@ const showPopup = (idx, coordinates) => {
 			extends: PopupContent,
 			setup() {
 				title.value = SATELLITES_GEOJSON.features[idx].properties.title
-				videoSrc.value = SATELLITES_GEOJSON.features[idx].properties.videoSrc
+				videoSrcList.value = SATELLITES_GEOJSON.features[idx].properties.videoSrc
 				imgSrc.value = SATELLITES_GEOJSON.features[idx].properties.imgSrc
-				console.log(title, videoSrc, imgSrc, videoDialog)
-				return { title, videoSrc, imgSrc, videoDialog }
+				return { title, videoSrcList, imgSrc }
 			},
 		})
 
@@ -146,7 +142,6 @@ const showPopup = (idx, coordinates) => {
 			// // Tell Vue to render the VNode inside the element with id
 			// render(popupComp, document.getElementById('map-popup-content'))
 
-			console.log(MyNewPopup)
 			const app = createApp(MyNewPopup)
 			app.use(vuetify)
 			app.mount('#map-popup-content')
