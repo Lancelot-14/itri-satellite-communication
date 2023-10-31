@@ -52,13 +52,15 @@ const activeItem = ref(-1)
 
 /** methods */
 const loadPulsingDots = (map) => {
-	map.addImage('pulsing-dot', pulsingDot(map, 200, '72, 202, 228', '138, 226, 234', 0.3), {
+	// map.addImage('pulsing-dot', pulsingDot(map, 200, '72, 202, 228', '138, 226, 234', 0.3), {
+	map.addImage('pulsing-dot', pulsingDot(map, 200, '20, 93, 160', '20, 93, 160', 0.3), {
 		pixelRatio: 2,
 	})
-	map.addImage('pulsing-dot-cluster-1', pulsingDot(map, 200, '0, 119, 182', '0, 119, 182', 0.35), {
+	// map.addImage('pulsing-dot-cluster-1', pulsingDot(map, 200, '0, 119, 182', '0, 119, 182', 0.35), {
+	map.addImage('pulsing-dot-cluster-1', pulsingDot(map, 200, '0, 12, 102', '0, 12, 102', 0.35), {
 		pixelRatio: 2,
 	})
-	map.addImage('pulsing-dot-cluster-2', pulsingDot(map, 200, '0, 119, 182', '0, 119, 182', 0.45), {
+	map.addImage('pulsing-dot-cluster-2', pulsingDot(map, 200, '0, 12, 102', '0, 12, 102', 0.45), {
 		pixelRatio: 2,
 	})
 }
@@ -313,7 +315,7 @@ onMounted(() => {
 		'pk.eyJ1IjoiYmFja3RvMTk5NyIsImEiOiJjbGE0NTZid2YwOTI4M25tbGJkMXdoZTMxIn0.hHOxXEG2GlwC0vw3IEGWiw'
 	map.value = new mapboxgl.Map({
 		container: 'map', // container ID
-		style: 'mapbox://styles/mapbox/dark-v10', // style URL
+		style: 'mapbox://styles/mapbox/streets-v11', // style URL
 		center: ORIG_CENTER, // starting position [lng, lat]
 		zoom: ORIG_ZOOM, // starting zoom
 		minZoom: 1.8,
